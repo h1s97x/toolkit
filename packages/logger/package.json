@@ -1,0 +1,52 @@
+{
+  "name": "@h1s97x/logger",
+  "version": "0.1.0",
+  "description": "Universal isomorphic logger with structured JSON output, child loggers, pluggable transports, and automatic redaction",
+  "author": "h1s97x",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  },
+  "keywords": [
+    "logger",
+    "logging",
+    "isomorphic",
+    "universal",
+    "structured-logging",
+    "pino-inspired",
+    "typescript",
+    "browser",
+    "node"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h1s97x/toolkit.git",
+    "directory": "packages/logger"
+  },
+  "bugs": {
+    "url": "https://github.com/h1s97x/toolkit/issues"
+  },
+  "homepage": "https://github.com/h1s97x/toolkit/tree/main/packages/logger"
+}

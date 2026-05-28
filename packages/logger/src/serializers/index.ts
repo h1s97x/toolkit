@@ -1,0 +1,1 @@
+export { errSerializer } from './err'

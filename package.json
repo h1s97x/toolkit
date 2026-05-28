@@ -1,0 +1,30 @@
+{
+  "name": "toolkit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo of shared infrastructure packages for product group",
+  "author": "h1s97x",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "release": "pnpm build && pnpm test && pnpm changeset publish"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "@changesets/cli": "^2.27.0",
+    "unbuild": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
