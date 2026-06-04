@@ -1,0 +1,64 @@
+{
+  "name": "@h1s97x/api-client",
+  "version": "0.1.1",
+  "description": "Type-safe API response format (server) and HTTP client (browser) for Next.js applications",
+  "author": "h1s97x",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.cjs",
+      "types": "./dist/client.d.ts"
+    },
+    "./response": {
+      "import": "./dist/response.mjs",
+      "require": "./dist/response.cjs",
+      "types": "./dist/response.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "next": ">=14"
+  },
+  "devDependencies": {
+    "next": "^16.0.0",
+    "vitest": "^2.1.9",
+    "jsdom": "^25.0.0"
+  },
+  "keywords": [
+    "api",
+    "client",
+    "fetch",
+    "response",
+    "nextjs",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h1s97x/toolkit.git",
+    "directory": "packages/api-client"
+  },
+  "bugs": {
+    "url": "https://github.com/h1s97x/toolkit/issues"
+  },
+  "homepage": "https://github.com/h1s97x/toolkit/tree/main/packages/api-client"
+}
