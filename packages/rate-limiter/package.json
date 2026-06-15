@@ -1,6 +1,6 @@
 {
   "name": "@h1s97x/rate-limiter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Token-bucket rate limiter with FIFO request queue manager for Node.js and browser",
   "author": "h1s97x",
   "license": "MIT",

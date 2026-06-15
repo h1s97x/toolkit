@@ -226,6 +226,30 @@ export class RequestQueueManager {
   }
 
   /**
+   * Periodic cleanup: evict stale tasks that exceeded maxWaitTime
+   */
+  private cleanup(): void {
+    const now = Date.now()
+    const expired: QueuedJob[] = []
+
+    for (let i = this.queue.length - 1; i >= 0; i--) {
+      const job = this.queue[i]
+      if (now - job.createdAt > this.options.maxWaitTime) {
+        expired.push(job)
+        this.queue.splice(i, 1)
+        this.stats.waiting--
+      }
+    }
+
+    for (const job of expired) {
+      clearTimeout(job.timeout)
+      job.status = 'timeout'
+      this.stats.timeout++
+      job.reject(new Error(`CLEANUP: Task evicted after ${this.options.maxWaitTime}ms`))
+    }
+  }
+
+  /**
    * Update rate limiting config
    */
   updateRateLimit(refillRate: number, capacity?: number): void {
