@@ -1,0 +1,51 @@
+{
+  "name": "@h1s97x/retry",
+  "version": "0.1.1",
+  "description": "Type-safe retry logic with exponential backoff and jitter for TypeScript",
+  "author": "h1s97x",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@h1s97x/result": "workspace:*"
+  },
+  "keywords": [
+    "retry",
+    "exponential-backoff",
+    "jitter",
+    "typescript",
+    "error-handling"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h1s97x/toolkit.git",
+    "directory": "packages/retry"
+  },
+  "bugs": {
+    "url": "https://github.com/h1s97x/toolkit/issues"
+  },
+  "homepage": "https://github.com/h1s97x/toolkit/tree/main/packages/retry",
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}
