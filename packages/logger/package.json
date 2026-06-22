@@ -1,6 +1,6 @@
 {
   "name": "@h1s97x/logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Universal isomorphic logger with structured JSON output, child loggers, pluggable transports, and automatic redaction",
   "author": "h1s97x",
   "license": "MIT",
@@ -25,6 +25,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@h1s97x/errors": "workspace:*"
   },
   "devDependencies": {
     "vitest": "^2.1.9"

@@ -11,6 +11,7 @@
  */
 
 import { TokenBucketRateLimiter } from '@h1s97x/token-bucket';
+import { RateLimitError } from '@h1s97x/errors';
 
 export interface QueueOptions {
   /** Maximum queue length */
@@ -97,7 +98,10 @@ export class RequestQueueManager {
     const waitTimeout = timeout ?? this.options.maxWaitTime;
 
     if (this.queue.length >= this.options.maxSize) {
-      throw new Error(`QUEUE_FULL: Queue is full (${this.options.maxSize})`);
+      throw new RateLimitError('Queue is full', {
+        code: 'QUEUE_FULL',
+        context: { maxSize: this.options.maxSize, currentSize: this.queue.length },
+      });
     }
 
     this.stats.maxQueueLength = Math.max(
@@ -113,7 +117,10 @@ export class RequestQueueManager {
           this.stats.waiting--;
         }
         this.stats.timeout++;
-        reject(new Error(`TIMEOUT: Task waited too long (${waitTimeout}ms)`));
+        reject(new RateLimitError('Task waited too long', {
+          code: 'QUEUE_TIMEOUT',
+          context: { waitTimeout: waitTimeout },
+        }));
       }, waitTimeout);
 
       const job: QueuedJob = {
@@ -242,7 +249,10 @@ export class RequestQueueManager {
       clearTimeout(job.timeout);
       job.status = 'timeout';
       this.stats.timeout++;
-      job.reject(new Error(`CLEANUP: Task evicted after ${this.options.maxWaitTime}ms`));
+      job.reject(new RateLimitError('Task evicted from queue', {
+        code: 'QUEUE_EVICTED',
+        context: { maxWaitTime: this.options.maxWaitTime },
+      }));
     }
   }
 
@@ -263,7 +273,9 @@ export class RequestQueueManager {
   clear(): void {
     for (const job of this.queue) {
       clearTimeout(job.timeout);
-      job.reject(new Error('CLEARED: Queue has been cleared'));
+      job.reject(new RateLimitError('Queue has been cleared', {
+        code: 'QUEUE_CLEARED',
+      }));
     }
     this.queue = [];
     this.stats.waiting = 0;

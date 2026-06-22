@@ -4,47 +4,60 @@
  * 特性：
  * - 统一的请求/响应处理
  * - 自动解析新格式 { code, message, data } 和旧格式 { success, data/error }
- * - 统一错误处理
+ * - 统一错误处理（使用 @h1s97x/errors）
  * - 支持认证 token（从 cookie 读取）
  * - 超时控制
+ * - 请求/响应日志（使用 @h1s97x/logger）
  */
+
+import { ExternalServiceError, isBaseError, toBaseError } from '@h1s97x/errors';
+import { createLogger } from '@h1s97x/logger';
+
+const logger = createLogger({ name: 'api-client' });
 
 // ========== 类型定义 ==========
 
 /** API 响应格式（新格式） */
 export interface ApiResponseFormat<T = unknown> {
-  code: number
-  message: string
-  data: T
-  timestamp: number
+  code: number;
+  message: string;
+  data: T;
+  timestamp: number;
 }
 
 /** 旧格式响应（向后兼容） */
 export interface LegacyResponse<T = unknown> {
-  success: boolean
-  data?: T
-  error?: string
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
 /** 请求选项 */
 export interface RequestOptions extends Omit<RequestInit, 'body'> {
   /** 请求体（自动 JSON 序列化） */
-  body?: unknown
+  body?: unknown;
   /** 是否解析为新格式（默认 true） */
-  parseNewFormat?: boolean
+  parseNewFormat?: boolean;
   /** 超时时间（毫秒） */
-  timeout?: number
+  timeout?: number;
 }
 
-/** API 错误 */
-export class ApiError extends Error {
+/** API 错误（向后兼容，继承 ExternalServiceError） */
+export class ApiError extends ExternalServiceError {
+  public details?: Array<{ field: string; message: string }>;
+
   constructor(
-    public code: number,
+    code: number,
     message: string,
-    public details?: Array<{ field: string; message: string }>,
+    details?: Array<{ field: string; message: string }>,
   ) {
-    super(message);
+    super(message, {
+      code: `API_${code}`,
+      statusCode: code,
+      context: { details },
+    });
     this.name = 'ApiError';
+    this.details = details;
   }
 }
 
@@ -113,16 +126,33 @@ async function fetchWithTimeout(
     signal: controller.signal,
   };
 
+  const startTime = Date.now();
+  logger.info({ url, method: finalOptions.method ?? 'GET' }, 'API request started');
+
   try {
     const response = await fetch(url, finalOptions);
     clearTimeout(timeoutId);
+    const duration = Date.now() - startTime;
+
+    logger.info(
+      { url, status: response.status, duration },
+      'API request completed',
+    );
+
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+    const duration = Date.now() - startTime;
+
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new ApiError(408, 'Request timeout');
+      const err = new ApiError(408, 'Request timeout', [{ field: 'timeout', message: `${timeout}ms` }]);
+      logger.error({ url, duration, timeout }, 'API request timeout');
+      throw err;
     }
-    throw error;
+
+    const err = toBaseError(error, 'API request failed');
+    logger.error({ url, duration, error: err }, 'API request failed');
+    throw err;
   }
 }
 

@@ -1,9 +1,10 @@
 import type { Logger, LoggerOptions, LogLevel, LogObject, SerializerFn, Transport } from './types';
 import { LOG_LEVEL_NUMBERS } from './types';
-import { isLevelEnabled } from './levels';
+import { isLevelEnabled, isValidLevel } from './levels';
 import { timestamp } from './utils/format';
 import { redact } from './utils/redact';
 import { createConsoleTransport } from './transports/console';
+import { ConfigurationError, isBaseError, serializeError, toBaseError } from '@h1s97x/errors';
 
 export class LoggerImpl implements Logger {
   readonly level: LogLevel;
@@ -13,6 +14,17 @@ export class LoggerImpl implements Logger {
   private bindings: Record<string, unknown>;
 
   constructor(options: LoggerOptions = {}, bindings: Record<string, unknown> = {}) {
+    // Validate log level
+    if (options.level && !isValidLevel(options.level)) {
+      throw new ConfigurationError('Invalid log level', {
+        code: 'LOG_INVALID_LEVEL',
+        context: {
+          provided: options.level,
+          valid: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+        },
+      });
+    }
+
     this.level = options.level ?? 'info';
     this.optsName = options.name;
     this.bindings = bindings;
@@ -86,7 +98,15 @@ export class LoggerImpl implements Logger {
     if (typeof obj === 'string') {
       mergeObject = {};
       message = obj;
+    } else if (isBaseError(obj)) {
+      // Preserve the original Error instance in `err`, add serialized fields
+      mergeObject = {
+        err: obj,
+        ...serializeError(obj),
+      };
+      message = msg ?? obj.message;
     } else if (obj instanceof Error) {
+      // Plain Error - preserve the instance
       mergeObject = { err: obj };
       message = msg ?? obj.message;
     } else {
@@ -109,7 +129,8 @@ export class LoggerImpl implements Logger {
         transport.write(finalObj);
       } catch (err) {
         if (transport.onError) {
-          transport.onError(err as Error, finalObj);
+          const error = toBaseError(err, 'Transport write failed');
+          transport.onError(error, finalObj);
         }
         // Silently ignore transport errors
       }

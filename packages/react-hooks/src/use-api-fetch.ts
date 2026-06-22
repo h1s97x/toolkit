@@ -1,9 +1,13 @@
 import { useState, useCallback } from 'react';
+import { isBaseError, toBaseError } from '@h1s97x/errors';
+import { createLogger } from '@h1s97x/logger';
+
+const logger = createLogger({ name: 'react-hooks:useApiFetch' });
 
 interface FetchState<T> {
-  data: T | null
-  error: string | null
-  loading: boolean
+  data: T | null;
+  error: string | null;
+  loading: boolean;
 }
 
 /**
@@ -12,6 +16,7 @@ interface FetchState<T> {
  * - Handles both `{ code: 200, data }` and `{ success: true, data }` response formats
  * - Manages loading / error state automatically
  * - Sends `credentials: 'include'` by default
+ * - Uses @h1s97x/errors for error handling
  */
 export function useApiFetch<T = unknown>() {
   const [state, setState] = useState<FetchState<T>>({
@@ -30,17 +35,22 @@ export function useApiFetch<T = unknown>() {
         const success =
           json.success ?? (json.code >= 200 && json.code < 300);
         if (!success || !res.ok) {
-          throw new Error(
-            json.error || json.message || `Request failed (${res.status})`,
-          );
+          const message = json.error || json.message || `Request failed (${res.status})`;
+          throw new Error(message);
         }
 
         const result = (json.data ?? json) as T;
         setState({ data: result, error: null, loading: false });
         return result;
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Unknown error';
-        setState({ data: null, error: msg, loading: false });
+        const error = toBaseError(err, 'API fetch failed');
+        const message = isBaseError(error)
+          ? `[${error.code}] ${error.message}`
+          : error.message;
+
+        logger.error({ error, url }, 'useApiFetch: request failed');
+
+        setState({ data: null, error: message, loading: false });
         return null;
       }
     },

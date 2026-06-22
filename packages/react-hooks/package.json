@@ -1,6 +1,6 @@
 {
   "name": "@h1s97x/react-hooks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Collection of production-ready React hooks: debounce, async state, mobile detection, and API fetch",
   "author": "h1s97x",
   "license": "MIT",
@@ -25,6 +25,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@h1s97x/errors": "workspace:*",
+    "@h1s97x/logger": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"

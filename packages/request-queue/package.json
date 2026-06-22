@@ -1,6 +1,6 @@
 {
   "name": "@h1s97x/request-queue",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "FIFO request queue manager with rate limiting for Node.js and browser",
   "author": "h1s97x",
   "license": "MIT",
@@ -27,7 +27,8 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
-    "@h1s97x/token-bucket": "workspace:*"
+    "@h1s97x/token-bucket": "workspace:*",
+    "@h1s97x/errors": "workspace:*"
   },
   "devDependencies": {
     "vitest": "^2.1.9"

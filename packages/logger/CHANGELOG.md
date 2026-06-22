@@ -1,6 +1,6 @@
-# @h1s97x/request-queue
+# @h1s97x/logger
 
-## 0.1.2
+## 0.1.1
 
 ### Patch Changes
 
@@ -9,13 +9,3 @@
   - api-client: use ExternalServiceError, createLogger
   - request-queue: use RateLimitError instead of plain Error
   - react-hooks/use-api-fetch: use toBaseError for error handling
-
-## 0.1.1
-
-### Patch Changes
-
-- Split @h1s97x/rate-limiter into two focused packages:
-  - @h1s97x/token-bucket: pure token-bucket rate limiter
-  - @h1s97x/request-queue: FIFO queue manager (depends on token-bucket)
-- Updated dependencies
-  - @h1s97x/token-bucket@0.1.1

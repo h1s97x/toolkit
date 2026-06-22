@@ -1,6 +1,6 @@
 {
   "name": "@h1s97x/api-client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Type-safe API response format (server) and HTTP client (browser) for Next.js applications",
   "author": "h1s97x",
   "license": "MIT",
@@ -35,6 +35,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@h1s97x/errors": "workspace:*",
+    "@h1s97x/logger": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14"

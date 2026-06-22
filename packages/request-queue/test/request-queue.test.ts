@@ -70,17 +70,20 @@ describe('RequestQueueManager', () => {
     const queue = new RequestQueueManager({
       maxSize: 1,
       maxWaitTime: 5000,
-      bucketCapacity: 10,
-      requestsPerSecond: 100,
+      bucketCapacity: 0, // No tokens - jobs won't be processed
+      requestsPerSecond: 0,
     });
 
-    // Fill the queue
-    void queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 1000)));
+    // Fill the queue (add catch to suppress unhandled rejection)
+    void queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 1000))).catch(() => {});
+
+    // Wait a bit to ensure the first enqueue has completed
+    await new Promise(r => setTimeout(r, 50));
 
     // This should fail immediately
     await expect(
       queue.enqueue(() => Promise.resolve('test')),
-    ).rejects.toThrow('QUEUE_FULL');
+    ).rejects.toThrow('Queue is full');
     queue.destroy();
   });
 
@@ -95,7 +98,10 @@ describe('RequestQueueManager', () => {
     // Fill the bucket by acquiring all tokens
     const promises: Promise<unknown>[] = [];
     for (let i = 0; i < 10; i++) {
-      promises.push(queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000))));
+      // Add catch to suppress unhandled rejections
+      const p = queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000)));
+      p.catch(() => {});
+      promises.push(p);
     }
 
     // Wait for timeout
@@ -131,8 +137,8 @@ describe('RequestQueueManager', () => {
     const queue = new RequestQueueManager({
       maxSize: 10,
       maxWaitTime: 5000,
-      bucketCapacity: 10,
-      requestsPerSecond: 10,
+      bucketCapacity: 0,   // 不处理，让任务留在队列
+      requestsPerSecond: 0,
     });
 
     expect(queue.getEstimatedWaitTime()).toBe(0);
@@ -150,14 +156,14 @@ describe('RequestQueueManager', () => {
     const queue = new RequestQueueManager({
       maxSize: 2,
       maxWaitTime: 5000,
-      bucketCapacity: 10,
-      requestsPerSecond: 100,
+      bucketCapacity: 0,   // 不处理，任务留在队列
+      requestsPerSecond: 0,
     });
 
     expect(queue.canEnqueue().allowed).toBe(true);
 
-    queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000)));
-    queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000)));
+    queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000))).catch(() => {});
+    queue.enqueue(() => new Promise(resolve => setTimeout(resolve, 10000))).catch(() => {});
 
     expect(queue.canEnqueue().allowed).toBe(false);
     queue.destroy();
@@ -167,8 +173,8 @@ describe('RequestQueueManager', () => {
     const queue = new RequestQueueManager({
       maxSize: 10,
       maxWaitTime: 5000,
-      bucketCapacity: 10,
-      requestsPerSecond: 100,
+      bucketCapacity: 0,   // 不处理，任务留在队列
+      requestsPerSecond: 0,
     });
 
     const p1 = queue.enqueue(() => Promise.resolve(1));
@@ -177,24 +183,24 @@ describe('RequestQueueManager', () => {
     queue.clear();
 
     // After clear, waiting tasks should be rejected
-    await expect(p1).rejects.toThrow('CLEARED');
-    await expect(p2).rejects.toThrow('CLEARED');
+    await expect(p1).rejects.toThrow('Queue has been cleared');
+    await expect(p2).rejects.toThrow('Queue has been cleared');
     queue.destroy();
   });
 
-  it('should destroy and release resources', () => {
+  it('should destroy and release resources', async () => {
     const queue = new RequestQueueManager({
       maxSize: 10,
       maxWaitTime: 5000,
-      bucketCapacity: 10,
-      requestsPerSecond: 100,
+      bucketCapacity: 0,   // 不处理，任务留在队列
+      requestsPerSecond: 0,
     });
 
     const p = queue.enqueue(() => Promise.resolve(1));
     queue.destroy();
 
     // After destroy, waiting tasks should be rejected
-    expect(p).rejects.toThrow('CLEARED');
+    await expect(p).rejects.toThrow('Queue has been cleared');
   });
 });
 

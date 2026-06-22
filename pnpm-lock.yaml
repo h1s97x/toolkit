@@ -46,13 +46,20 @@ importers:
         version: 2.0.0(typescript@5.9.3)
 
   packages/api-client:
+    dependencies:
+      '@h1s97x/errors':
+        specifier: workspace:*
+        version: link:../errors
+      '@h1s97x/logger':
+        specifier: workspace:*
+        version: link:../logger
     devDependencies:
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
       next:
         specifier: ^16.0.0
-        version: 16.2.7(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       vitest:
         specifier: ^2.1.9
         version: 2.1.9(jsdom@25.0.1)
@@ -67,12 +74,23 @@ importers:
         version: 2.1.9(jsdom@25.0.1)
 
   packages/logger:
+    dependencies:
+      '@h1s97x/errors':
+        specifier: workspace:*
+        version: link:../errors
     devDependencies:
       vitest:
         specifier: ^2.1.9
         version: 2.1.9(jsdom@25.0.1)
 
   packages/react-hooks:
+    dependencies:
+      '@h1s97x/errors':
+        specifier: workspace:*
+        version: link:../errors
+      '@h1s97x/logger':
+        specifier: workspace:*
+        version: link:../logger
     devDependencies:
       '@testing-library/react':
         specifier: ^16.0.0
@@ -89,6 +107,9 @@ importers:
 
   packages/request-queue:
     dependencies:
+      '@h1s97x/errors':
+        specifier: workspace:*
+        version: link:../errors
       '@h1s97x/token-bucket':
         specifier: workspace:*
         version: link:../token-bucket
@@ -5014,7 +5035,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@16.2.7(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       '@next/env': 16.2.7
       '@swc/helpers': 0.5.15
@@ -5023,7 +5044,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.7)
+      styled-jsx: 5.1.6(react@19.2.7)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.7
       '@next/swc-darwin-x64': 16.2.7
@@ -5495,12 +5516,10 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.7):
+  styled-jsx@5.1.6(react@19.2.7):
     dependencies:
       client-only: 0.0.1
       react: 19.2.7
-    optionalDependencies:
-      '@babel/core': 7.29.7
 
   stylehacks@7.0.11(postcss@8.5.15):
     dependencies:
