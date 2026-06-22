@@ -42,12 +42,6 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(jsdom@25.0.1)
 
-  packages/rate-limiter:
-    devDependencies:
-      vitest:
-        specifier: ^2.1.9
-        version: 2.1.9(jsdom@25.0.1)
-
   packages/react-hooks:
     devDependencies:
       '@testing-library/react':
@@ -59,6 +53,22 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.7
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(jsdom@25.0.1)
+
+  packages/request-queue:
+    dependencies:
+      '@h1s97x/token-bucket':
+        specifier: workspace:*
+        version: link:../token-bucket
+    devDependencies:
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(jsdom@25.0.1)
+
+  packages/token-bucket:
+    devDependencies:
       vitest:
         specifier: ^2.1.9
         version: 2.1.9(jsdom@25.0.1)

@@ -10,7 +10,7 @@
  * - Periodic stale cleanup
  */
 
-import { TokenBucketRateLimiter } from './token-bucket'
+import { TokenBucketRateLimiter } from '@h1s97x/token-bucket'
 
 export interface QueueOptions {
   /** Maximum queue length */
@@ -137,11 +137,9 @@ export class RequestQueueManager {
    */
   private async processQueue(): Promise<void> {
     while (this.queue.length > 0) {
-      // Acquire a rate-limit token (wait up to 100ms)
-      try {
-        await this.rateLimiter.acquire(100)
-      } catch {
-        break
+      if (!this.rateLimiter.tryAcquire()) {
+        await new Promise(r => setTimeout(r, 50))
+        continue
       }
 
       const job = this.queue.shift()
@@ -154,7 +152,6 @@ export class RequestQueueManager {
 
       job.status = 'processing'
 
-      // Execute the task and resolve/reject the promise
       try {
         const result = await job.task()
         job.status = 'completed'

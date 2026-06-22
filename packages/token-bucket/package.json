@@ -1,7 +1,7 @@
 {
-  "name": "@h1s97x/rate-limiter",
-  "version": "0.1.2",
-  "description": "Token-bucket rate limiter with FIFO request queue manager for Node.js and browser",
+  "name": "@h1s97x/token-bucket",
+  "version": "0.1.1",
+  "description": "Token-bucket rate limiter for Node.js and browser",
   "author": "h1s97x",
   "license": "MIT",
   "type": "module",
@@ -32,19 +32,16 @@
   "keywords": [
     "rate-limiter",
     "token-bucket",
-    "request-queue",
     "throttle",
-    "typescript",
-    "node",
-    "browser"
+    "typescript"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/h1s97x/toolkit.git",
-    "directory": "packages/rate-limiter"
+    "directory": "packages/token-bucket"
   },
   "bugs": {
     "url": "https://github.com/h1s97x/toolkit/issues"
   },
-  "homepage": "https://github.com/h1s97x/toolkit/tree/main/packages/rate-limiter"
+  "homepage": "https://github.com/h1s97x/toolkit/tree/main/packages/token-bucket"
 }
