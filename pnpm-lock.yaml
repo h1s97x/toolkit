@@ -57,6 +57,15 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(jsdom@25.0.1)
 
+  packages/errors:
+    devDependencies:
+      unbuild:
+        specifier: ^2.0.0
+        version: 2.0.0(typescript@5.9.3)
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(jsdom@25.0.1)
+
   packages/logger:
     devDependencies:
       vitest:
