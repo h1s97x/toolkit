@@ -14,7 +14,7 @@
  *   { code: 400|401|..., message: string, errors?: ErrorDetail[], timestamp }
  */
 
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 // ========== 类型定义 ==========
 
@@ -54,20 +54,20 @@ export interface ErrorResponse {
   timestamp: number
 }
 
-export type ErrorCode = 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500
+export type ErrorCode = 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500;
 
 // ========== 响应构建器 ==========
 
 export class ApiResponse {
   private static getTimestamp(): number {
-    return Date.now()
+    return Date.now();
   }
 
   /** 成功响应（单条数据） */
   static success<T>(
     data: T,
     message = 'success',
-    status: 200 | 201 = 200
+    status: 200 | 201 = 200,
   ): NextResponse<SuccessResponse<T>> {
     return NextResponse.json(
       {
@@ -77,21 +77,21 @@ export class ApiResponse {
         data,
         timestamp: this.getTimestamp(),
       },
-      { status }
-    )
+      { status },
+    );
   }
 
   /** 创建成功（POST 创建资源，201） */
   static created<T>(
     data: T,
-    message = 'Created successfully'
+    message = 'Created successfully',
   ): NextResponse<SuccessResponse<T>> {
-    return this.success(data, message, 201)
+    return this.success(data, message, 201);
   }
 
   /** 无内容（DELETE 成功，204） */
   static noContent(): NextResponse {
-    return new NextResponse(null, { status: 204 })
+    return new NextResponse(null, { status: 204 });
   }
 
   // ========== 列表响应 ==========
@@ -101,9 +101,9 @@ export class ApiResponse {
     items: T[],
     page: number,
     pageSize: number,
-    total: number
+    total: number,
   ): NextResponse<ListResponse<T>> {
-    const totalPages = Math.ceil(total / pageSize) || 1
+    const totalPages = Math.ceil(total / pageSize) || 1;
     return NextResponse.json({
       success: true,
       code: 200,
@@ -113,7 +113,7 @@ export class ApiResponse {
         pagination: { page, page_size: pageSize, total, total_pages: totalPages },
       },
       timestamp: this.getTimestamp(),
-    })
+    });
   }
 
   /** successList 别名（兼容） */
@@ -121,9 +121,9 @@ export class ApiResponse {
     items: T[],
     page: number,
     pageSize: number,
-    total: number
+    total: number,
   ): NextResponse<ListResponse<T>> {
-    return this.list(items, page, pageSize, total)
+    return this.list(items, page, pageSize, total);
   }
 
   // ========== 错误响应 ==========
@@ -131,56 +131,56 @@ export class ApiResponse {
   static error(
     code: ErrorCode,
     message: string,
-    errors?: ErrorDetail[]
+    errors?: ErrorDetail[],
   ): NextResponse<ErrorResponse> {
     return NextResponse.json(
       { code, message, errors, timestamp: this.getTimestamp() },
-      { status: code }
-    )
+      { status: code },
+    );
   }
 
   static badRequest(
     message: string,
-    errors?: ErrorDetail[]
+    errors?: ErrorDetail[],
   ): NextResponse<ErrorResponse> {
-    return this.error(400, message, errors)
+    return this.error(400, message, errors);
   }
 
   static unauthorized(
-    message = 'Unauthorized'
+    message = 'Unauthorized',
   ): NextResponse<ErrorResponse> {
-    return this.error(401, message)
+    return this.error(401, message);
   }
 
   static forbidden(message = 'Forbidden'): NextResponse<ErrorResponse> {
-    return this.error(403, message)
+    return this.error(403, message);
   }
 
   static notFound(message = 'Not found'): NextResponse<ErrorResponse> {
-    return this.error(404, message)
+    return this.error(404, message);
   }
 
   static conflict(message: string): NextResponse<ErrorResponse> {
-    return this.error(409, message)
+    return this.error(409, message);
   }
 
   static unprocessable(
     message: string,
-    errors?: ErrorDetail[]
+    errors?: ErrorDetail[],
   ): NextResponse<ErrorResponse> {
-    return this.error(422, message, errors)
+    return this.error(422, message, errors);
   }
 
   static tooManyRequests(
-    message = 'Too many requests'
+    message = 'Too many requests',
   ): NextResponse<ErrorResponse> {
-    return this.error(429, message)
+    return this.error(429, message);
   }
 
   static internalError(
-    message = 'Internal server error'
+    message = 'Internal server error',
   ): NextResponse<ErrorResponse> {
-    return this.error(500, message)
+    return this.error(500, message);
   }
 }
 
@@ -203,22 +203,22 @@ export const ApiErrors = {
   badRequest: (msg: string) => ApiResponse.badRequest(msg),
   conflict: (msg: string) => ApiResponse.conflict(msg),
   internalError: (msg?: string) => ApiResponse.internalError(msg),
-}
+};
 
 // ========== 便捷函数（兼容旧代码） ==========
 
 export function errorResponse(
   error: unknown,
-  message: string
+  message: string,
 ): NextResponse<ErrorResponse> {
-  console.error(`[API Error] ${message}:`, error)
-  return ApiResponse.internalError(message)
+  console.error(`[API Error] ${message}:`, error);
+  return ApiResponse.internalError(message);
 }
 
 export function handleDbError(
   error: { message?: string; code?: string } | unknown,
-  message: string
+  message: string,
 ): NextResponse<ErrorResponse> {
-  console.error(`[DB Error] ${message}:`, error)
-  return ApiResponse.internalError(message)
+  console.error(`[DB Error] ${message}:`, error);
+  return ApiResponse.internalError(message);
 }

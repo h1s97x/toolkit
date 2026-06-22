@@ -10,22 +10,22 @@ export function errSerializer(value: unknown): Record<string, unknown> {
       name: value.name,
       message: value.message,
       stack: value.stack,
-    }
+    };
 
     if (value.cause) {
-      result.cause = errSerializer(value.cause)
+      result.cause = errSerializer(value.cause);
     }
 
     // Include additional enumerable properties (e.g. statusCode, code)
     for (const key of Object.keys(value)) {
       if (!(key in result)) {
-        result[key] = (value as Record<string, unknown>)[key]
+        result[key] = (value as unknown as Record<string, unknown>)[key];
       }
     }
 
-    return result
+    return result;
   }
 
   // Not an Error, return as-is
-  return { type: typeof value, value }
+  return { type: typeof value, value };
 }

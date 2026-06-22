@@ -1,4 +1,4 @@
-import type { Transport, LogObject } from '../types'
+import type { Transport, LogObject } from '../types';
 
 const LEVEL_TO_CONSOLE: Record<number, 'debug' | 'log' | 'info' | 'warn' | 'error'> = {
   10: 'debug', // trace
@@ -7,7 +7,7 @@ const LEVEL_TO_CONSOLE: Record<number, 'debug' | 'log' | 'info' | 'warn' | 'erro
   40: 'warn',  // warn
   50: 'error', // error
   60: 'error', // fatal
-}
+};
 
 /**
  * Console Transport — writes formatted log objects to the console.
@@ -16,26 +16,26 @@ const LEVEL_TO_CONSOLE: Record<number, 'debug' | 'log' | 'info' | 'warn' | 'erro
 export function createConsoleTransport(): Transport {
   return {
     write(logObject: LogObject): void {
-      const method = LEVEL_TO_CONSOLE[logObject.level] || 'log'
-      const formatted = JSON.stringify(logObject)
+      const method = LEVEL_TO_CONSOLE[logObject.level] || 'log';
+      const formatted = JSON.stringify(logObject);
 
       switch (method) {
         case 'debug':
-          console.debug(formatted)
-          break
+          console.debug(formatted);
+          break;
         case 'log':
-          console.log(formatted)
-          break
+          console.log(formatted);
+          break;
         case 'info':
-          console.info(formatted)
-          break
+          console.info(formatted);
+          break;
         case 'warn':
-          console.warn(formatted)
-          break
+          console.warn(formatted);
+          break;
         case 'error':
-          console.error(formatted)
-          break
+          console.error(formatted);
+          break;
       }
     },
-  }
+  };
 }

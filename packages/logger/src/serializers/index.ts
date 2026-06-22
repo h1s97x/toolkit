@@ -1,1 +1,1 @@
-export { errSerializer } from './err'
+export { errSerializer } from './err';

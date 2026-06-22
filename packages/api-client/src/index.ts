@@ -7,5 +7,5 @@
  * - `client`: HTTP client with auth token, timeout, and dual-format parsing (browser, client-side)
  */
 
-export * from './response'
-export * from './client'
+export * from './response';
+export * from './client';

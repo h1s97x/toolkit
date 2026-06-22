@@ -1,7 +1,7 @@
 /**
  * Log level severity, from lowest to highest.
  */
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 /**
  * Numeric mapping of log levels (higher = more severe).
@@ -14,7 +14,7 @@ export const LOG_LEVEL_NUMBERS: Record<LogLevel, number> = {
   warn: 40,
   error: 50,
   fatal: 60,
-}
+};
 
 /**
  * A single transport that writes formatted log objects.
@@ -40,7 +40,7 @@ export interface LogObject {
  * Serializer function: transforms a value before logging.
  * Used to safely serialize Error objects, strip sensitive fields, etc.
  */
-export type SerializerFn = (value: unknown) => unknown
+export type SerializerFn = (value: unknown) => unknown;
 
 /**
  * Options for creating a Logger instance.

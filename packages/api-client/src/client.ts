@@ -41,88 +41,88 @@ export class ApiError extends Error {
   constructor(
     public code: number,
     message: string,
-    public details?: Array<{ field: string; message: string }>
+    public details?: Array<{ field: string; message: string }>,
   ) {
-    super(message)
-    this.name = 'ApiError'
+    super(message);
+    this.name = 'ApiError';
   }
 }
 
 // ========== API 客户端 ==========
 
-const DEFAULT_TIMEOUT = 30000
+const DEFAULT_TIMEOUT = 30000;
 
 function getAuthToken(): string | null {
-  if (typeof document === 'undefined') return null
-  const cookies = document.cookie.split(';')
+  if (typeof document === 'undefined') return null;
+  const cookies = document.cookie.split(';');
   for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'auth_token') return value
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'auth_token') return value;
   }
-  return null
+  return null;
 }
 
 async function parseResponse<T>(
   response: Response,
-  parseNewFormat: boolean = true
+  parseNewFormat: boolean = true,
 ): Promise<T> {
-  const text = await response.text()
+  const text = await response.text();
 
   if (!text) {
-    if (response.status === 204) return null as T
-    throw new ApiError(response.status, 'Empty response')
+    if (response.status === 204) return null as T;
+    throw new ApiError(response.status, 'Empty response');
   }
 
-  const json = JSON.parse(text)
+  const json = JSON.parse(text);
 
   if (parseNewFormat && 'code' in json) {
-    if (json.code >= 200 && json.code < 300) return json.data as T
-    throw new ApiError(json.code, json.message, json.errors)
+    if (json.code >= 200 && json.code < 300) return json.data as T;
+    throw new ApiError(json.code, json.message, json.errors);
   }
 
   if ('success' in json) {
-    if (json.success) return json.data as T
-    throw new ApiError(response.status, json.error || 'Request failed')
+    if (json.success) return json.data as T;
+    throw new ApiError(response.status, json.error || 'Request failed');
   }
 
-  return json as T
+  return json as T;
 }
 
 async function fetchWithTimeout(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<Response> {
-  const { timeout = DEFAULT_TIMEOUT, body, ...restOptions } = options
+  const { timeout = DEFAULT_TIMEOUT, body, ...restOptions } = options;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(restOptions.headers as Record<string, string>),
-  }
+  };
 
-  const token = getAuthToken()
+  const token = getAuthToken();
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
   const finalOptions: RequestInit = {
     ...restOptions,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
     signal: controller.signal,
-  }
+  };
 
   try {
-    const response = await fetch(url, finalOptions)
-    clearTimeout(timeoutId)
-    return response
+    const response = await fetch(url, finalOptions);
+    clearTimeout(timeoutId);
+    return response;
   } catch (error) {
-    clearTimeout(timeoutId)
+    clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new ApiError(408, 'Request timeout')
+      throw new ApiError(408, 'Request timeout');
     }
-    throw error
+    throw error;
   }
 }
 
@@ -130,74 +130,74 @@ async function fetchWithTimeout(
 
 export async function apiGet<T = unknown>(
   url: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
-  const response = await fetchWithTimeout(url, { ...options, method: 'GET' })
-  return parseResponse<T>(response, options?.parseNewFormat ?? true)
+  const response = await fetchWithTimeout(url, { ...options, method: 'GET' });
+  return parseResponse<T>(response, options?.parseNewFormat ?? true);
 }
 
 export async function apiPost<T = unknown>(
   url: string,
   body?: unknown,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const response = await fetchWithTimeout(url, {
     ...options,
     method: 'POST',
     body,
-  })
-  return parseResponse<T>(response, options?.parseNewFormat ?? true)
+  });
+  return parseResponse<T>(response, options?.parseNewFormat ?? true);
 }
 
 export async function apiPut<T = unknown>(
   url: string,
   body?: unknown,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const response = await fetchWithTimeout(url, {
     ...options,
     method: 'PUT',
     body,
-  })
-  return parseResponse<T>(response, options?.parseNewFormat ?? true)
+  });
+  return parseResponse<T>(response, options?.parseNewFormat ?? true);
 }
 
 export async function apiPatch<T = unknown>(
   url: string,
   body?: unknown,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const response = await fetchWithTimeout(url, {
     ...options,
     method: 'PATCH',
     body,
-  })
-  return parseResponse<T>(response, options?.parseNewFormat ?? true)
+  });
+  return parseResponse<T>(response, options?.parseNewFormat ?? true);
 }
 
 export async function apiDelete<T = unknown>(
   url: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
-  const response = await fetchWithTimeout(url, { ...options, method: 'DELETE' })
-  return parseResponse<T>(response, options?.parseNewFormat ?? true)
+  const response = await fetchWithTimeout(url, { ...options, method: 'DELETE' });
+  return parseResponse<T>(response, options?.parseNewFormat ?? true);
 }
 
 // ========== 工具函数 ==========
 
 export function buildUrl(
   base: string,
-  params?: Record<string, string | number | boolean>
+  params?: Record<string, string | number | boolean>,
 ): string {
-  if (!params) return base
+  if (!params) return base;
   const query = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null)
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
     )
-    .join('&')
-  return query ? `${base}?${query}` : base
+    .join('&');
+  return query ? `${base}?${query}` : base;
 }
 
 // ========== 便捷导出 ==========
@@ -210,8 +210,8 @@ export const api = {
   delete: apiDelete,
   buildUrl,
   ApiError,
-}
+};
 
-export const apiClient = api
-export type ApiResult<T = unknown> = ApiResponseFormat<T>
-export type ApiClient = typeof api
+export const apiClient = api;
+export type ApiResult<T = unknown> = ApiResponseFormat<T>;
+export type ApiClient = typeof api;

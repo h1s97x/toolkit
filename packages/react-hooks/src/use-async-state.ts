@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react';
 
 export interface AsyncState<T> {
   data: T | null
@@ -13,26 +13,26 @@ export interface AsyncState<T> {
  */
 export function useAsyncState<TData, TParams extends unknown[] = []>(
   fetcher: (...params: TParams) => Promise<TData | null>,
-  initialData: TData | null = null
+  initialData: TData | null = null,
 ) {
   const [state, setState] = useState<AsyncState<TData>>({
     data: initialData,
     loading: false,
     error: null,
-  })
+  });
 
   const execute = useCallback(async (...params: TParams): Promise<TData | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const result = await fetcher(...params)
-      setState(prev => ({ ...prev, data: result, loading: false }))
-      return result
+      const result = await fetcher(...params);
+      setState(prev => ({ ...prev, data: result, loading: false }));
+      return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Operation failed'
-      setState(prev => ({ ...prev, error: message, loading: false }))
-      return null
+      const message = err instanceof Error ? err.message : 'Operation failed';
+      setState(prev => ({ ...prev, error: message, loading: false }));
+      return null;
     }
-  }, [fetcher])
+  }, [fetcher]);
 
   const setData = useCallback((updater: TData | ((prev: TData | null) => TData | null)) => {
     setState(prev => ({
@@ -40,8 +40,8 @@ export function useAsyncState<TData, TParams extends unknown[] = []>(
       data: typeof updater === 'function'
         ? (updater as (prev: TData | null) => TData | null)(prev.data)
         : updater,
-    }))
-  }, [])
+    }));
+  }, []);
 
-  return { ...state, execute, setData }
+  return { ...state, execute, setData };
 }

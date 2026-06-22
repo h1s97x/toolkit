@@ -8,19 +8,30 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "lint": "eslint .",
+    "test:coverage": "pnpm -r --filter './packages/*' test -- --coverage",
+    "lint": "eslint packages",
+    "lint:fix": "eslint packages --fix",
+    "type-check": "pnpm -r exec tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish",
-    "release": "pnpm build && pnpm test && pnpm changeset publish"
+    "release": "pnpm lint && pnpm type-check && pnpm build && pnpm test && pnpm changeset:publish",
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.3.0",
     "@changesets/cli": "^2.27.0",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^9.0.0",
+    "eslint-plugin-vitest": "^0.5.4",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.61.1",
     "unbuild": "^2.0.0"
   },
   "engines": {

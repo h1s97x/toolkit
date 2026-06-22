@@ -10,7 +10,7 @@
  * - Periodic stale cleanup
  */
 
-import { TokenBucketRateLimiter } from '@h1s97x/token-bucket'
+import { TokenBucketRateLimiter } from '@h1s97x/token-bucket';
 
 export interface QueueOptions {
   /** Maximum queue length */
@@ -50,23 +50,23 @@ const DEFAULT_OPTIONS: QueueOptions = {
   maxWaitTime: 60000,
   bucketCapacity: 20,
   requestsPerSecond: 10,
-}
+};
 
 export class RequestQueueManager {
-  private queue: QueuedJob[] = []
-  private options: QueueOptions
-  private rateLimiter: TokenBucketRateLimiter
-  private stats: Omit<QueueStats, 'avgWaitTime' | 'currentTokenBucket'>
-  private cleanupInterval: ReturnType<typeof setInterval> | null = null
-  private idCounter: number = 0
+  private queue: QueuedJob[] = [];
+  private options: QueueOptions;
+  private rateLimiter: TokenBucketRateLimiter;
+  private stats: Omit<QueueStats, 'avgWaitTime' | 'currentTokenBucket'>;
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null;
+  private idCounter: number = 0;
 
   constructor(options: Partial<QueueOptions> = {}) {
-    this.options = { ...DEFAULT_OPTIONS, ...options }
+    this.options = { ...DEFAULT_OPTIONS, ...options };
 
     this.rateLimiter = new TokenBucketRateLimiter({
       capacity: this.options.bucketCapacity,
       refillRate: this.options.requestsPerSecond,
-    })
+    });
 
     this.stats = {
       waiting: 0,
@@ -76,15 +76,15 @@ export class RequestQueueManager {
       timeout: 0,
       maxQueueLength: 0,
       totalProcessed: 0,
-    }
+    };
 
     this.cleanupInterval = setInterval(() => {
-      this.cleanup()
-    }, 10000)
+      this.cleanup();
+    }, 10000);
   }
 
   private generateId(): string {
-    return `job_${Date.now()}_${++this.idCounter}`
+    return `job_${Date.now()}_${++this.idCounter}`;
   }
 
   /**
@@ -93,28 +93,28 @@ export class RequestQueueManager {
    * once a rate-limit token is acquired and the task completes.
    */
   async enqueue<T>(task: () => Promise<T>, timeout?: number): Promise<T> {
-    const jobId = this.generateId()
-    const waitTimeout = timeout ?? this.options.maxWaitTime
+    const jobId = this.generateId();
+    const waitTimeout = timeout ?? this.options.maxWaitTime;
 
     if (this.queue.length >= this.options.maxSize) {
-      throw new Error(`QUEUE_FULL: Queue is full (${this.options.maxSize})`)
+      throw new Error(`QUEUE_FULL: Queue is full (${this.options.maxSize})`);
     }
 
     this.stats.maxQueueLength = Math.max(
       this.stats.maxQueueLength,
-      this.queue.length + 1
-    )
+      this.queue.length + 1,
+    );
 
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        const index = this.queue.findIndex(j => j.id === jobId)
+        const index = this.queue.findIndex(j => j.id === jobId);
         if (index !== -1) {
-          this.queue.splice(index, 1)
-          this.stats.waiting--
+          this.queue.splice(index, 1);
+          this.stats.waiting--;
         }
-        this.stats.timeout++
-        reject(new Error(`TIMEOUT: Task waited too long (${waitTimeout}ms)`))
-      }, waitTimeout)
+        this.stats.timeout++;
+        reject(new Error(`TIMEOUT: Task waited too long (${waitTimeout}ms)`));
+      }, waitTimeout);
 
       const job: QueuedJob = {
         id: jobId,
@@ -124,12 +124,12 @@ export class RequestQueueManager {
         createdAt: Date.now(),
         timeout: timeoutId,
         status: 'waiting',
-      }
+      };
 
-      this.queue.push(job)
-      this.stats.waiting++
-      this.processQueue()
-    })
+      this.queue.push(job);
+      this.stats.waiting++;
+      this.processQueue();
+    });
   }
 
   /**
@@ -138,31 +138,31 @@ export class RequestQueueManager {
   private async processQueue(): Promise<void> {
     while (this.queue.length > 0) {
       if (!this.rateLimiter.tryAcquire()) {
-        await new Promise(r => setTimeout(r, 50))
-        continue
+        await new Promise(r => setTimeout(r, 50));
+        continue;
       }
 
-      const job = this.queue.shift()
-      if (!job) break
+      const job = this.queue.shift();
+      if (!job) break;
 
-      clearTimeout(job.timeout)
-      this.stats.waiting--
-      this.stats.processing++
-      this.stats.totalProcessed++
+      clearTimeout(job.timeout);
+      this.stats.waiting--;
+      this.stats.processing++;
+      this.stats.totalProcessed++;
 
-      job.status = 'processing'
+      job.status = 'processing';
 
       try {
-        const result = await job.task()
-        job.status = 'completed'
-        this.stats.processing--
-        this.stats.completed++
-        job.resolve(result)
+        const result = await job.task();
+        job.status = 'completed';
+        this.stats.processing--;
+        this.stats.completed++;
+        job.resolve(result);
       } catch (error) {
-        job.status = 'failed'
-        this.stats.processing--
-        this.stats.failed++
-        job.reject(error instanceof Error ? error : new Error(String(error)))
+        job.status = 'failed';
+        this.stats.processing--;
+        this.stats.failed++;
+        job.reject(error instanceof Error ? error : new Error(String(error)));
       }
     }
   }
@@ -171,28 +171,28 @@ export class RequestQueueManager {
    * Get queue statistics
    */
   getStats(): QueueStats {
-    const now = Date.now()
+    const now = Date.now();
     const totalWaitTime = this.queue.reduce(
       (sum, job) => sum + (now - job.createdAt),
-      0
-    )
+      0,
+    );
     const avgWaitTime =
-      this.queue.length > 0 ? totalWaitTime / this.queue.length : 0
+      this.queue.length > 0 ? totalWaitTime / this.queue.length : 0;
 
     return {
       ...this.stats,
       avgWaitTime,
       currentTokenBucket: this.rateLimiter.getStatus(),
-    }
+    };
   }
 
   /**
    * Estimate wait time for a new task
    */
   getEstimatedWaitTime(): number {
-    if (this.queue.length === 0) return 0
-    const avgWaitPerRequest = 1000 / this.options.requestsPerSecond
-    return Math.ceil(this.queue.length * avgWaitPerRequest)
+    if (this.queue.length === 0) return 0;
+    const avgWaitPerRequest = 1000 / this.options.requestsPerSecond;
+    return Math.ceil(this.queue.length * avgWaitPerRequest);
   }
 
   /**
@@ -207,42 +207,42 @@ export class RequestQueueManager {
       return {
         allowed: false,
         reason: `Queue is full (${this.queue.length}/${this.options.maxSize})`,
-      }
+      };
     }
 
-    const estimatedWait = this.getEstimatedWaitTime()
+    const estimatedWait = this.getEstimatedWaitTime();
     if (estimatedWait > this.options.maxWaitTime) {
       return {
         allowed: false,
         reason: `Estimated wait too long (${Math.round(estimatedWait / 1000)}s)`,
         estimatedWait,
-      }
+      };
     }
 
-    return { allowed: true, estimatedWait }
+    return { allowed: true, estimatedWait };
   }
 
   /**
    * Periodic cleanup: evict stale tasks that exceeded maxWaitTime
    */
   private cleanup(): void {
-    const now = Date.now()
-    const expired: QueuedJob[] = []
+    const now = Date.now();
+    const expired: QueuedJob[] = [];
 
     for (let i = this.queue.length - 1; i >= 0; i--) {
-      const job = this.queue[i]
+      const job = this.queue[i];
       if (now - job.createdAt > this.options.maxWaitTime) {
-        expired.push(job)
-        this.queue.splice(i, 1)
-        this.stats.waiting--
+        expired.push(job);
+        this.queue.splice(i, 1);
+        this.stats.waiting--;
       }
     }
 
     for (const job of expired) {
-      clearTimeout(job.timeout)
-      job.status = 'timeout'
-      this.stats.timeout++
-      job.reject(new Error(`CLEANUP: Task evicted after ${this.options.maxWaitTime}ms`))
+      clearTimeout(job.timeout);
+      job.status = 'timeout';
+      this.stats.timeout++;
+      job.reject(new Error(`CLEANUP: Task evicted after ${this.options.maxWaitTime}ms`));
     }
   }
 
@@ -250,11 +250,11 @@ export class RequestQueueManager {
    * Update rate limiting config
    */
   updateRateLimit(refillRate: number, capacity?: number): void {
-    this.options.requestsPerSecond = refillRate
+    this.options.requestsPerSecond = refillRate;
     if (capacity !== undefined) {
-      this.options.bucketCapacity = capacity
+      this.options.bucketCapacity = capacity;
     }
-    this.rateLimiter.updateConfig(refillRate, capacity)
+    this.rateLimiter.updateConfig(refillRate, capacity);
   }
 
   /**
@@ -262,11 +262,11 @@ export class RequestQueueManager {
    */
   clear(): void {
     for (const job of this.queue) {
-      clearTimeout(job.timeout)
-      job.reject(new Error('CLEARED: Queue has been cleared'))
+      clearTimeout(job.timeout);
+      job.reject(new Error('CLEARED: Queue has been cleared'));
     }
-    this.queue = []
-    this.stats.waiting = 0
+    this.queue = [];
+    this.stats.waiting = 0;
   }
 
   /**
@@ -274,19 +274,19 @@ export class RequestQueueManager {
    */
   destroy(): void {
     if (this.cleanupInterval !== null) {
-      clearInterval(this.cleanupInterval)
-      this.cleanupInterval = null
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
     }
-    this.clear()
+    this.clear();
   }
 }
 
 // Singleton factory
-let queueInstance: RequestQueueManager | null = null
+let queueInstance: RequestQueueManager | null = null;
 
 export function getRequestQueue(): RequestQueueManager {
   if (!queueInstance) {
-    queueInstance = new RequestQueueManager()
+    queueInstance = new RequestQueueManager();
   }
-  return queueInstance
+  return queueInstance;
 }
